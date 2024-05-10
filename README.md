@@ -5,7 +5,10 @@
 - Crear un proyecto con Vite
 - Props básico
 - Props avanzado
-- Eventos como props
+- Props de eventos
+- Props de estilos
+- useState
+- useState valor futuro
 
 ### Crear un proyecto con Vite
 
@@ -64,6 +67,7 @@ function App() {
       />
       <Input value='' handleChange={event => console.log(event)} />
       <Container styles={{ border: '1px solid black', padding: '1rem' }} />
+      <LoggedIn />
     </>
   )
 }
@@ -196,12 +200,12 @@ export const Oscar = (props: OscarProps) => {
 }
 ```
 
-### Eventos como props
+### Props de eventos
 
 `Button.tsx`
 
 ```ts
-type ButtonProps = {
+type ButtonProps = { // Tipo del evento
   handleClick: (event: React.MouseEvent<HTMLButtonElement>, id: number) => void
 }
 
@@ -226,6 +230,8 @@ export const Input = ({ value, handleChange }: InputProps) => {
 }
 ```
 
+### Props de estilos
+
 `Container.tsx`
 
 ```ts
@@ -237,6 +243,64 @@ export const Container = (props: ContainerProps) => {
   return (
     <div style={props.styles}>
       Text content goes here
+    </div>
+  )
+}
+```
+
+### useState
+
+`LoggedIn.tsx`
+
+```ts
+import { useState } from 'react'
+
+export const LoggedIn = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false) // Infiere en el tipo que le pasamos
+  const handleLogin = () => {
+    setIsLoggedIn(true)
+  }
+  const handleLogout = () => {
+    setIsLoggedIn(false) // Sin TypeScript, le podríamos pasar un 0
+  }
+  return (
+    <div>
+      <button onClick={handleLogin}>Login</button>
+      <button onClick={handleLogout}>Logout</button>
+      <div>User is {isLoggedIn ? 'logged in' : 'logged out'}</div>
+    </div>
+  )
+}
+```
+
+### useState valor futuro
+
+`User.tsx`
+
+```ts
+import { useState } from 'react'
+
+type AuthUser = {
+  name: string
+  email: string
+}
+
+export const User = () => {
+  const [user, setUser] = useState<AuthUser | null>(null) // Explecitamos que en el futuro puede ser AuthUser
+  const handleLogin = () => {
+    setUser({
+      name: 'Vishwas',
+      email: 'vishwas@example.com'
+    })
+  }
+  const handleLogout = () => {
+    setUser(null)
+  }
+  return (
+    <div>
+      <button onClick={handleLogin}>Login</button>
+      <button onClick={handleLogout}>Logout</button>
+      <div>User name is {user?.name}</div> // El usuario pude ser null
     </div>
   )
 }

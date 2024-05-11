@@ -9,7 +9,8 @@
 - Props de estilos
 - useState
 - useState valor futuro y aserción
-- useReducer
+- useReducer 
+- useContext
 
 ### Crear un proyecto con Vite
 
@@ -369,3 +370,6 @@ export const Counter = () => {
   )
 }
 ```
+
+### useContext
+

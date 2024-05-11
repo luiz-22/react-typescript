@@ -8,7 +8,8 @@
 - Props de eventos
 - Props de estilos
 - useState
-- useState valor futuro
+- useState valor futuro y aserción
+- useReducer
 
 ### Crear un proyecto con Vite
 
@@ -68,6 +69,8 @@ function App() {
       <Input value='' handleChange={event => console.log(event)} />
       <Container styles={{ border: '1px solid black', padding: '1rem' }} />
       <LoggedIn />
+      <User />
+      <Counter />
     </>
   )
 }
@@ -107,12 +110,14 @@ export const Greet = (props: GreetProps) => { // Necesitamos informale el tipo d
 `Person.types.ts`
 
 ```ts
+// Puedo tener los tipos en un archivo separado para organizar mejor
+
 export type Name = {
   first: string
   last: string
 }
 export type PersonProps = {
-  name: Name
+  name: Name // Podría organizarlo de esta manera para reusarlo en distintos lugares
 }
 ```
 
@@ -222,7 +227,7 @@ type InputProps = {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-export const Input = ({ value, handleChange }: InputProps) => {
+export const Input = ({ value, handleChange }: InputProps) => { // Puedo destructurar
   // const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   console.log(event)
   // }
@@ -273,7 +278,7 @@ export const LoggedIn = () => {
 }
 ```
 
-### useState valor futuro
+### useState valor futuro y aserción
 
 `User.tsx`
 
@@ -287,13 +292,17 @@ type AuthUser = {
 
 export const User = () => {
   const [user, setUser] = useState<AuthUser | null>(null) // Explecitamos que en el futuro puede ser AuthUser
+
+  // Si luego que el componente se monte, no tendré un usuario null, puedo usar una aserción
+  //const [user, setUser] = useState<AuthUser>({} as AuthUser)
+
   const handleLogin = () => {
     setUser({
       name: 'Vishwas',
       email: 'vishwas@example.com'
     })
   }
-  const handleLogout = () => {
+  const handleLogout = () => { // Si uso una asercion, ya no necesitaria esta función
     setUser(null)
   }
   return (
@@ -301,7 +310,62 @@ export const User = () => {
       <button onClick={handleLogin}>Login</button>
       <button onClick={handleLogout}>Logout</button>
       <div>User name is {user?.name}</div> // El usuario pude ser null
+      //<div>User name is {user.name}</div> // Si uso una asercion, no necesito el encadenamiento opcional
     </div>
+  )
+}
+```
+
+### useReducer
+
+`Counter.tsx`
+
+```ts
+import { useReducer } from 'react'
+
+type CounterState = {
+  count: number
+}
+
+type UpdateAction = {
+  type: 'increment' | 'decrement' // restringimos las Action types
+  payload: number
+}
+
+type ResetAction = {
+  type: 'reset' // restringimos las Action types
+}
+
+type CounterAction = UpdateAction | ResetAction // ResetAction no tiene payload
+
+const initialState = { count: 0 }
+
+function reducer(state: CounterState, action: CounterAction) {
+  switch (action.type) {
+    case 'increment':
+      return { count: state.count + action.payload }
+    case 'decrement':
+      return { count: state.count - action.payload }
+    case 'reset':
+      return initialState
+    default:
+      return state
+  }
+}
+
+export const Counter = () => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+  return (
+    <>
+      Count: {state.count}
+      <button onClick={() => dispatch({ type: 'increment', payload: 10 })}>
+        Increment 10
+      </button>
+      <button onClick={() => dispatch({ type: 'decrement', payload: 10 })}>
+        Decrement 10
+      </button>
+      <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
+    </>
   )
 }
 ```

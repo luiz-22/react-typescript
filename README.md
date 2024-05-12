@@ -11,6 +11,12 @@
 - useState valor futuro y aserción
 - useReducer 
 - useContext
+- useContext valor futuro y aserción
+- useRef
+- Componente de clase
+- Componente como prop
+- Props genéricas
+- Restringir props
 
 ### Crear un proyecto con Vite
 
@@ -30,6 +36,15 @@ import { Oscar } from './components/props/Oscar'
 import { Button } from './components/props/Button'
 import { Input } from './components/props/Input'
 import { Container } from './components/props/Container'
+import { ThemeContextProvider } from './components/context/ThemeContext'
+import { Box } from './components/context/Box'
+import { UserContextProvider } from './components/context/UserContext'
+import { User as UserContext } from './components/context/User'
+import { DomRef } from './components/refs/DomRef'
+import { MutableRef } from './components/refs/MutableRef'
+import { Counter as CounterClass } from './components/class/Counter'
+import { Private } from './components/auth/Private'
+import { Profile } from './components/auth/Profile'
 
 function App() {
   const personName = {
@@ -72,6 +87,16 @@ function App() {
       <LoggedIn />
       <User />
       <Counter />
+       <ThemeContextProvider>
+        <Box />
+      </ThemeContextProvider>
+      <UserContextProvider>
+        <UserContext />
+      </UserContextProvider>
+      <DomRef />
+      <MutableRef />
+      <CounterClass message='The count value is ' />
+      <Private isLoggedIn={true} component={Profile}/>
     </>
   )
 }
@@ -373,3 +398,297 @@ export const Counter = () => {
 
 ### useContext
 
+`theme.ts`
+
+```ts
+export const theme = {
+  primary: {
+    main: '#3f51b5',
+    text: '#fff'
+  },
+  secondary: {
+    main: '#f50057',
+    text: '#fff'
+  }
+}
+```
+
+`ThemeContext.tsx`
+
+```ts
+import React, { createContext } from 'react'
+import { theme } from './theme'
+
+type ThemeContextProviderProps = {
+  children: React.ReactNode
+}
+
+export const ThemeContext = createContext(theme)
+
+export const ThemeContextProvider = ({
+  children
+}: ThemeContextProviderProps) => {
+  return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
+}
+```
+
+`Box.tsx`
+
+```ts
+import { useContext } from 'react'
+import { ThemeContext } from './ThemeContext'
+
+export const Box = () => {
+  const theme = useContext(ThemeContext)
+  return (
+    <div
+      style={{
+        backgroundColor: theme.primary.main,
+        color: theme.primary.text
+      }}>
+      Theme context
+    </div>
+  )
+}
+```
+
+### useContext valor futuro y aserción
+
+`UserContext.tsx`
+
+```ts
+import React, { useState, createContext } from 'react'
+
+type AuthUser = {
+  name: string
+  email: string
+}
+
+type UserContextType = {
+  user: AuthUser | null 
+  setUser: React.Dispatch<React.SetStateAction<AuthUser | null>>
+}
+
+type UserContextProviderProps = {
+  children: React.ReactNode
+}
+
+// export const UserContext = createContext<UserContextType | null>(null) // Valor futuro
+export const UserContext = createContext({} as UserContextType) // Aserción
+
+export const UserContextProvider = ({ children }: UserContextProviderProps) => {
+  const [user, setUser] = useState<AuthUser | null>(null) // Especificamos que en el futuro pude ser AuthUser
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  )
+}
+```
+
+`User.tsx`
+
+```ts
+import { useContext } from 'react'
+import { UserContext } from './UserContext'
+
+export const User = () => {
+  const userContext = useContext(UserContext)
+  const handleLogin = () => {
+    // if (userContext) {
+    userContext.setUser({
+      name: 'Vishwas',
+      email: 'asd@asd.com'
+    })
+    // }
+  }
+  const handleLogout = () => {
+    // if (userContext) {
+    userContext.setUser(null)
+    // }
+  }
+  return (
+    <div>
+      <button onClick={handleLogin}>Login</button>
+      <button onClick={handleLogout}>Logout</button>
+      <div>User name is {userContext.user?.name}</div>
+      <div>User email is {userContext.user?.email}</div>
+      {/* <div>User name is {userContext?.user?.name}</div>
+      <div>User email is {userContext?.user?.email}</div> */}
+    </div>
+  )
+}
+```
+
+### useRef
+
+`DomRef.tsx`
+
+```ts
+// useRef de solo lecturar
+import { useRef, useEffect } from 'react'
+
+export const DomRef = () => {
+  // Espeficamos el tipo de elemento del DOM
+  // Que no sea null para no usar el encadenamiento opcional
+  const inputRef = useRef<HTMLInputElement>(null!) 
+  useEffect(() => {
+    inputRef.current.focus()
+  }, [])
+  return (
+    <div>
+      <input type='text' ref={inputRef} />
+    </div>
+  )
+}
+```
+
+`MutableRef.tsx`
+
+```ts
+// useRef mutable
+import { useState, useRef, useEffect } from 'react'
+
+export const MutableRef = () => {
+  const [timer, setTimer] = useState(0)
+  const interValRef = useRef<number | null>(null)
+
+  const stopTimer = () => {
+    if (interValRef.current) {
+      window.clearInterval(interValRef.current)
+    }
+  }
+  useEffect(() => {
+    interValRef.current = window.setInterval(() => {
+      setTimer(timer => timer + 1)
+    }, 1000)
+    return () => {
+      stopTimer()
+    }
+  }, [])
+
+  return (
+    <div>
+      HookTimer - {timer} -
+      <button onClick={() => stopTimer()}>Stop Timer</button>
+    </div>
+  )
+}
+```
+
+### Componente de clase
+
+`Counter.tsx`
+
+```ts
+import { Component } from 'react'
+
+type CounterProps = {
+  message: string
+}
+type CounterState = {
+  count: number
+}
+
+/** The count value is 5 */
+// Si no tengo props, especifico un objeto vacio <{}, CounterState>
+export class Counter extends Component<CounterProps, CounterState> {
+  state = {
+    count: 0
+  }
+
+  handleClick = () => {
+    this.setState(prevState => ({ count: prevState.count + 1 }))
+  }
+  render() {
+    return (
+      <div>
+        <button onClick={this.handleClick}>Increment</button>
+        {this.props.message} {this.state.count}
+      </div>
+    )
+  }
+}
+```
+
+### Componente como prop
+
+`Login.tsx`
+
+```ts
+export const Login = () => {
+  return <div>Please login to continue</div>
+}
+```
+
+`Profile.tsx`
+
+```ts
+export type ProfileProps = {
+  name: string
+}
+
+export const Profile = ({ name }: ProfileProps) => {
+  return <div>Private Profile component. Name is {name}</div>
+}
+```
+
+`Private.tsx`
+
+```ts
+import { Login } from './Login'
+import { ProfileProps } from './Profile'
+
+type PrivateProps = {
+  isLoggedIn: boolean
+  Component: React.ComponentType<ProfileProps>
+}
+
+// Recibe dos props, isLoggedIn y un componente que necesita ser invocado si el usuario se loggea
+export const Private = ({ isLoggedIn, component: Component }: PrivateProps) => {
+  if (isLoggedIn) {
+    return <Component name='Vishwas' />
+  } else {
+    return <Login />
+  }
+}
+```
+
+### Props genéricas
+
+`List.tsx`
+
+```ts
+type ListProps<T> = {
+  items: T[]
+  onClick: (value: T) => void
+}
+
+// Restringimos que debe tener una propiedad id y que sea number
+// Si no hay restricción quedaría <T extends {}>
+export const List = <T extends { id: number }>({ 
+  items,
+  onClick
+}: ListProps<T>) => {
+  return (
+    <div>
+      <h2>List of items</h2>
+      {items.map(item => {
+        return (
+          <div key={item.id} onClick={() => onClick(item)}>
+            {item.id}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+```
+
+### Restringir props
+
+`List.tsx`
+
+```ts
+
+```

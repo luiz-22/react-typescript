@@ -14,9 +14,11 @@
 - useContext valor futuro y aserción
 - useRef
 - Componente de clase
-- Componente como prop
+- Componentes como prop
 - Props genéricas
-- Restringir props
+- Restringir props (tipo `never`)
+- Template Literals y Exclude
+- Envolver elementos HTML
 
 ### Crear un proyecto con Vite
 
@@ -611,7 +613,7 @@ export class Counter extends Component<CounterProps, CounterState> {
 }
 ```
 
-### Componente como prop
+### Componentes como prop
 
 `Login.tsx`
 
@@ -685,10 +687,94 @@ export const List = <T extends { id: number }>({
 }
 ```
 
-### Restringir props
+### Restringir props (tipo `never`)
 
-`List.tsx`
+`RandomNumber.tsx`
 
 ```ts
+type RandomNumberType = {
+  value: number
+}
+
+type PositiveNumber = RandomNumberType & {
+  isPositive: boolean
+  isNegative?: never
+  isZero?: never
+}
+
+type NegativeNumber = RandomNumberType & {
+  isNegative: boolean
+  isPositive?: never
+  isZero?: never
+}
+
+type Zero = RandomNumberType & {
+  isZero: boolean
+  isPositive?: never
+  isNegative?: never
+}
+
+type RandomNumberProps = PositiveNumber | NegativeNumber | Zero
+
+export const RandomNumber = ({
+  value,
+  isPositive,
+  isNegative,
+  isZero
+}: RandomNumberProps) => {
+  return (
+    <div>
+      {value} {isPositive && 'positive'} {isNegative && 'negative'}{' '}
+      {isZero && 'zero'}
+    </div>
+  )
+}
+```
+
+### Template Literals y Exclude
+
+`Toast.tsx`
+
+```ts
+type HorizontalPosition = 'left' | 'center' | 'right'
+type VerticalPosition = 'top' | 'center' | 'bottom'
+
+type ToastProps = {
+  position:  // TS infiere todas las posibles combinaciones
+    | Exclude<`${HorizontalPosition}-${VerticalPosition}`, 'center-center'> // Excluye la segunda propiedad
+    | 'center'
+}
+
+/**
+ * Position prop can be one of
+ * "left-center" | "left-top" | "left-bottom" | "center" | "center-top" |
+ * "center-bottom" | "right-center" | "right-top" | "right-bottom"
+ */
+
+export const Toast = ({ position }: ToastProps) => {
+  return <div>Toast Notification Position - {position}</div>
+}
+```
+
+### Envolver elementos HTML
+
+`.tsx`
+
+```ts
+
+
+```
+
+`.tsx`
+
+```ts
+
+
+```
+
+`.tsx`
+
+```ts
+
 
 ```

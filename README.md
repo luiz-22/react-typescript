@@ -18,7 +18,9 @@
 - Props genéricas
 - Restringir props (tipo `never`)
 - Template Literals y Exclude
-- Envolver elementos HTML
+- Envolver elementos HTML y crear componentes personalizados
+- Extraer Prop Types de componentes
+- Componentes polimórficos
 
 ### Crear un proyecto con Vite
 
@@ -47,6 +49,13 @@ import { MutableRef } from './components/refs/MutableRef'
 import { Counter as CounterClass } from './components/class/Counter'
 import { Private } from './components/auth/Private'
 import { Profile } from './components/auth/Profile'
+import { List } from './components/generics/List'
+import { RandomNumber } from './components/restriction/RandomNumber'
+import { Toast } from './components/templateliterals/Toast'
+import { CustomButton } from './components/html/Button'
+import { Input as InputHTML } from './components/html/Input'
+import { CustomComponent } from './components/html/CustomComponent'
+import { Text } from './components/polymorphic/Text'
 
 function App() {
   const personName = {
@@ -99,6 +108,47 @@ function App() {
       <MutableRef />
       <CounterClass message='The count value is ' />
       <Private isLoggedIn={true} component={Profile}/>
+         {/* <List
+        items={['Batman', 'Superman', 'Wonder Woman']}
+        onClick={item => console.log(item)}
+      />
+      <List items={[1, 2, 3]} onClick={item => console.log(item)} /> */}
+      <List
+        items={[
+          {
+            id: 1,
+            first: 'Bruce',
+            last: 'Wayne'
+          },
+          {
+            id: 2,
+            first: 'Clark',
+            last: 'Kent'
+          },
+          {
+            id: 3,
+            first: 'Princess',
+            last: 'Diana'
+          }
+        ]}
+        onClick={item => console.log(item)}
+      />
+      <RandomNumber value={10} isPositive />
+      <Toast position='center' />
+      <CustomButton variant='primary' onClick={() => console.log('Clicked')}>
+        Button Label
+      </CustomButton>
+      <InputHTML />
+      <CustomComponent name="Bruce" isLoggedIn={true} />
+      <Text size='lg' as='h1'>
+        Heading
+      </Text>
+      <Text size='md' as='p'>
+        Paragraph
+      </Text>
+      <Text size='sm' color='secondary' as='label' htmlFor='someId'>
+        Label
+      </Text> F
     </>
   )
 }
@@ -756,25 +806,81 @@ export const Toast = ({ position }: ToastProps) => {
 }
 ```
 
-### Envolver elementos HTML
+### Envolver elementos HTML y crear componentes personalizados
 
-`.tsx`
+Se puede usar si vas a desarrollar un sistema de diseño o una aplicación React sin depender de una biblioteca de componentes de interfaz de usuario.
+
+`Button.tsx`
 
 ```ts
+// Necesitamos especificar que ButtonProps incluye la propiedades del botón html, además de nuestra propiedad especial variant
+type ButtonProps = {
+  variant: 'primary' | 'secondary'
+  children: string
+} & Omit<React.ComponentProps<'button'>, 'children'>
+// La palabra Omit, toma un tipo objeto y elimina las propiedades especificadas
+// Necesitamos decirle a TS que omita el children type desde el tipo de elemento html button
 
-
+export const CustomButton = ({ variant, children, ...rest }: ButtonProps) => {
+  return (
+    <button className={`class-with-${variant}`} {...rest}>
+      {children}
+    </button>
+  )
+}
+// Así es más o menos cómo se envuelve elementos html y agrega sus propios tipos y lógica
 ```
 
-`.tsx`
+`Input.tsx`
 
 ```ts
+type InputProps = React.ComponentProps<'input'>
 
-
+export const Input = (props: InputProps) => {
+  return <input {...props} />
+}
 ```
 
-`.tsx`
+### Extraer Prop Types de componentes
+
+`CustomComponent.tsx`
 
 ```ts
+// Queremos reusar (extraer) props types de un componente existente, pero no tiene acceso a los tipos en sí
+// Necesita las mismas propiedades que el componente Greet
+import { Greet } from '../props/Greet'
 
+export const CustomComponent = (props: React.ComponentProps<typeof Greet>) => {
+  return <div>{props.name}</div>
+}
+```
 
+### Componentes polimórficos
+
+No lo necesitará, a menos que este creando una biblioteca de componentes o un sistema de diseño.
+
+`Text.tsx`
+
+```ts
+type TextOwnProps<E extends React.ElementType> = {
+  size?: 'sm' | 'md' | 'lg'
+  color?: 'primary' | 'secondary'
+  children: React.ReactNode
+  as?: E
+}
+
+type TextProps<E extends React.ElementType> = TextOwnProps<E> &
+  Omit<React.ComponentProps<E>, keyof TextOwnProps<E>>
+
+export const Text = <E extends React.ElementType = 'div'>({
+  size,
+  color,
+  children,
+  as
+}: TextProps<E>) => {
+  const Component = as || 'div'
+  return (
+    <Component className={`class-with-${size}-${color}`}>{children}</Component>
+  )
+}
 ```

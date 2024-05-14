@@ -157,7 +157,7 @@ function App() {
       </Text>
       <Text size='sm' color='secondary' as='label' htmlFor='someId'>
         Label
-      </Text> F
+      </Text>
     </>
   )
 }

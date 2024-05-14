@@ -1,5 +1,14 @@
 <h1 align="center">React - TypeScript</h1>
 
+[React TypeScript Tutorial - Codevolution](https://www.youtube.com/watch?v=TiSGujM22OI&list=PLC3y8-rFHvwi1AXijGTKM0BKtHzVC-LSK)
+
+## Instalar y ejecutar
+
+```bash
+npm i
+npm run dev
+```
+
 ## Temas
 
 - Crear un proyecto con Vite
@@ -857,7 +866,7 @@ export const CustomComponent = (props: React.ComponentProps<typeof Greet>) => {
 
 ### Componentes polimórficos
 
-No lo necesitará, a menos que este creando una biblioteca de componentes o un sistema de diseño.
+No lo usarás, a menos que estes creando una biblioteca de componentes o un sistema de diseño.
 
 `Text.tsx`
 

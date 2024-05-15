@@ -1,4 +1,4 @@
-<h1 align="center">React - TypeScript</h1>
+<h1 align="center">React + TypeScript</h1>
 
 [React TypeScript Tutorial - Codevolution](https://www.youtube.com/watch?v=TiSGujM22OI&list=PLC3y8-rFHvwi1AXijGTKM0BKtHzVC-LSK)
 
@@ -6,6 +6,9 @@
 
 ```bash
 npm i
+```
+
+```bash
 npm run dev
 ```
 

@@ -2,11 +2,13 @@
 
 [React TypeScript Tutorial - Codevolution](https://www.youtube.com/watch?v=TiSGujM22OI&list=PLC3y8-rFHvwi1AXijGTKM0BKtHzVC-LSK)
 
-## Instalar y ejecutar
+## Instalar
 
 ```bash
 npm i
 ```
+
+## Ejecutar
 
 ```bash
 npm run dev

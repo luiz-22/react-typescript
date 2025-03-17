@@ -1,18 +1,15 @@
-<h1 align="center">React + TypeScript</h1>
+# React + TypeScript
 
-[React TypeScript Tutorial - Codevolution](https://www.youtube.com/watch?v=TiSGujM22OI&list=PLC3y8-rFHvwi1AXijGTKM0BKtHzVC-LSK)
+[Tutorial - Codevolution](https://www.youtube.com/watch?v=TiSGujM22OI&list=PLC3y8-rFHvwi1AXijGTKM0BKtHzVC-LSK)
 
-## Instalar y ejecutar
+## 🔧 Instalación y ejecución
 
 ```bash
 npm i
-```
-
-```bash
 npm run dev
 ```
 
-## Temas
+## 📖 Temas
 
 - Crear un proyecto con Vite
 - Props básico
